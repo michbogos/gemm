@@ -11,17 +11,6 @@ int main(){
     if(fileptr == NULL){
         return 0;
     }
-    // fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
-    // filelen = ftell(fileptr);             // Get the current byte offset in the file
-    // rewind(fileptr);                      // Jump back to the beginning of the file
-
-    // buffer = (char *)malloc(filelen * sizeof(char)); // Enough memory for the file
-    // fread(buffer, filelen, 1, fileptr); // Read in the entire file
-    // fclose(fileptr); // Close the file
-    // char buf[512];
-    // if(fgets(buf, 511, fileptr)==NULL){
-    //     return 0;
-    // }
     int res = fscanf(fileptr, "%d %d %d", &N, &M, &K);
     if(res != 3) return 0;
     printf("%d %d %d\n", N, M, K);
