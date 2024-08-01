@@ -1,8 +1,8 @@
 import numpy as np
 
-N = 1024
-M = 1024
-K = 1024
+N = 512
+M = 512
+K = 512
 
 mat1 = np.random.rand(N, M)
 mat2 = np.random.rand(M, K)
