@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
+#include<time.h>
 
 int main(){
     int N, M, K;
@@ -32,6 +33,8 @@ int main(){
     }
 
 
+    clock_t tic, toc;
+    tic = clock();
     for(int i = 0; i < N; i++){
         for(int j = 0; j < M; j++){
             for(int k = 0; k < K; k++){
@@ -39,6 +42,7 @@ int main(){
             }
         }
     }
+    toc = clock();
     for(int i = 0; i < N; i++){
         for(int j = 0; j < K; j++){
             if(fabsf(mat3[i*K+j]-matref[i*K+j]) > 0.001){
@@ -47,6 +51,7 @@ int main(){
             }
         }
     }
+    printf("GFLOPS/S: %f\n", N*K*M/(((float)toc-(float)tic)/(float)CLOCKS_PER_SEC)/1000000000);
     fclose(fileptr);
     return 0;
 }
