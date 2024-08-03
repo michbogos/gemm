@@ -2,6 +2,7 @@
 #include<stdlib.h>
 #include<math.h>
 #include<time.h>
+#include<immintrin.h>
 
 int main(){
     int N, M, K;
@@ -32,13 +33,19 @@ int main(){
         fscanf(fileptr, "%f", &matref[i]);
     }
 
+    __m256 a;
+    __m256 b;
+    __m256 c;
+
 
     clock_t tic, toc;
     tic = clock();
     for(int i = 0; i < N; i++){
         for(int j = 0; j < M; j++){
-            for(int k = 0; k < K; k++){
-                mat3[i*K+k] += mat1[i*M+j]*mat2[j*K+k];
+            for(int k = 0; k < K; k+=8){
+                _mm256_store_ps(mat3+i*K+k, _mm256_add_ps(_mm256_load_ps(mat3+i*K+k),_mm256_mul_ps(_mm256_set1_ps(mat1[i*M+j]), _mm256_load_ps(mat2+j*K+k))));
+
+                // mat3[i*K+k] += mat1[i*M+j]*mat2[j*K+k];
             }
         }
     }
