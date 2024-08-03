@@ -11,9 +11,9 @@ float randf(){
 int main(){
     int N, M, K;
 
-    N = 512;
-    M = 512;
-    K = 512;
+    N = 1024;
+    M = 1024;
+    K = 1024;
 
     // FILE* fileptr;
 
