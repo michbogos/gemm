@@ -50,14 +50,29 @@ int main(){
         }
     }
 
+    int masks[16];
+    for(int i = 0; i < 8; i++){
+        masks[i] = ~(0);
+    }
+    for(int i = 8; i < 16; i++){
+        masks[i] = 0;
+    }
+
+    __m256i large_masks[8];
+    for(int i = 0; i < 8; i++){
+        large_masks[i] = _mm256_set_epi32(masks[i+7], masks[i+6],masks[i+5],masks[i+4],masks[i+3],masks[i+2],masks[i+1],masks[i+0]);
+    }
+
+    __m256i mask;
+
 
     clock_t tic, toc;
     tic = clock();
     for(int i = 0; i < N; i++){
         for(int j = 0; j < M; j++){
             for(int k = 0; k < K; k+=8){
-                _mm256_store_ps(mat3+i*K+k, _mm256_add_ps(_mm256_load_ps(mat3+i*K+k),_mm256_mul_ps(_mm256_set1_ps(mat1[i*M+j]), _mm256_load_ps(mat2+j*K+k))));
-
+                mask = K-k < 8 ? large_masks[8-(K-k)]:large_masks[0];
+                _mm256_maskstore_ps(mat3+i*K+k, mask, _mm256_fmadd_ps(_mm256_set1_ps(mat1[i*M+j]), _mm256_maskload_ps(mat2+j*K+k, mask),_mm256_maskload_ps(mat3+i*K+k, mask)));
                 // mat3[i*K+k] += mat1[i*M+j]*mat2[j*K+k];
             }
         }
