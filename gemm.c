@@ -11,9 +11,9 @@ float randf(){
 int main(){
     int N, M, K;
 
-    N = 1024;
-    M = 1024;
-    K = 1024;
+    N = 9;
+    M = 9;
+    K = 9;
 
     // FILE* fileptr;
 
@@ -70,11 +70,18 @@ int main(){
     tic = clock();
     for(int i = 0; i < N; i++){
         for(int j = 0; j < M; j++){
-            for(int k = 0; k < K; k+=8){
-                mask = K-k < 8 ? large_masks[8-(K-k)]:large_masks[0];
-                _mm256_maskstore_ps(mat3+i*K+k, mask, _mm256_fmadd_ps(_mm256_set1_ps(mat1[i*M+j]), _mm256_maskload_ps(mat2+j*K+k, mask),_mm256_maskload_ps(mat3+i*K+k, mask)));
-                // mat3[i*K+k] += mat1[i*M+j]*mat2[j*K+k];
+            for(int k = 0; k < (K/8)*8; k+=8){
+                __m256 b = _mm256_load_ps(mat2+j*K+k);
+                __m256 c = _mm256_load_ps(mat3+i*K+k);
+                _mm256_store_ps(mat3+i*K+k, _mm256_fmadd_ps(_mm256_set1_ps(mat1[i*M+j]), b,c));
             }
+        }
+    }
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < M; j++){
+            int k = (K/8)*8;
+            mask = large_masks[8-(K-k)];
+            _mm256_maskstore_ps(mat3+i*K+k, mask, _mm256_fmadd_ps(_mm256_set1_ps(mat1[i*M+j]), _mm256_maskload_ps(mat2+j*K+k, mask),_mm256_maskload_ps(mat3+i*K+k, mask)));
         }
     }
     toc = clock();
