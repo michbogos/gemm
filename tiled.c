@@ -11,9 +11,10 @@ float randf(){
 int main(){
     int N, M, K;
 
-    N = 1023;
-    M = 1023;
-    K = 1023;
+    N = 512*2;
+    M = 512*2;
+    K = 512*2;
+    int BS = 8;
 
     // FILE* fileptr;
 
@@ -24,10 +25,10 @@ int main(){
     // int res = fscanf(fileptr, "%d %d %d", &N, &M, &K);
     // if(res != 3) return 0;
     printf("%d %d %d\n", N, M, K);
-    float* mat1 =   _mm_malloc(N*M*sizeof(float), 32);
-    float* mat2 =   _mm_malloc(M*K*sizeof(float), 32);
-    float* mat3 =   _mm_malloc(N*K*sizeof(float), 32);
-    float* matref = _mm_malloc(N*K*sizeof(float), 32);
+    float* mat1 =   aligned_alloc(32, N*M*sizeof(float));
+    float* mat2 =   aligned_alloc(32, M*K*sizeof(float));
+    float* mat3 =   aligned_alloc(32, N*K*sizeof(float));
+    float* matref = aligned_alloc(32, N*K*sizeof(float));
 
     for(int i = 0; i < N*M; i++){
         // fscanf(fileptr, "%f", &mat1[i]);
@@ -71,22 +72,16 @@ int main(){
 
     clock_t tic, toc;
     tic = clock();
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < M; j++){
-            __m256 a = _mm256_set1_ps(mat1[i*M+j]);
-            for(int k = 0; k < (K/8)*8; k+=8){
+    for(int i = 0; i < N; i+=BS){
+        for(int j = 0; j < M; j+=BS){
+            for(int k = 0; k < K; k += BS){
+                for(int by = 0; by < BS; by++){
+                        __m256 a = _mm256_load_ps(mat1+(i+by)*M+j);
+                        __m256 b = _mm256_load_ps(mat2+(j+by)*K+k);
+                        
+                }
                 // mask = K-k < 8 ? large_masks[8-(K-k)]:large_masks[0];
-                _mm256_store_ps(mat3+i*K+k, _mm256_fmadd_ps(a, _mm256_load_ps(mat2+j*K+k),_mm256_load_ps(mat3+i*K+k)));
                 // mat3[i*K+k] += mat1[i*M+j]*mat2[j*K+k];
-            }
-        }
-    }
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < M; j++){
-            __m256 a = _mm256_set1_ps(mat1[i*M+j]);
-            for(int k = (K/8)*8; k < K; k++){
-                mask = large_masks[8-(K-k)];
-                _mm256_maskstore_ps(mat3+i*K+k, mask, _mm256_fmadd_ps(a, _mm256_maskload_ps(mat2+j*K+k, mask),_mm256_maskload_ps(mat3+i*K+k, mask)));
             }
         }
     }

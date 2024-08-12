@@ -2,14 +2,14 @@
 #include<stdlib.h>
 
 int main(){
-    int N = 9;
-    int M = 9;
-    int K = 9;
+    int N = 1024;
+    int M = 1024;
+    int K = 1024;
 
-    float* mat1 =   aligned_alloc(32, N*M*sizeof(float));
-    float* mat2 =   aligned_alloc(32, M*K*sizeof(float));
-    float* mat3 =   aligned_alloc(32, N*K*sizeof(float));
-    float* matref = aligned_alloc(32, N*K*sizeof(float));
+    float* mat1 =   _mm_malloc(N*M*sizeof(float), 64);
+    float* mat2 =   _mm_malloc(M*K*sizeof(float), 64);
+    float* mat3 =   _mm_malloc(N*K*sizeof(float), 64);
+    float* matref = _mm_malloc(N*K*sizeof(float), 64);
 
     for(int i = 0; i < N; i++){
         for(int j = 0; j < M; j++){
