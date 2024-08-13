@@ -11,9 +11,9 @@ float randf(){
 int main(){
     int N, M, K;
 
-    N = 1023;
-    M = 1023;
-    K = 1023;
+    N = 1024;
+    M = 1024;
+    K = 1024;
 
     // FILE* fileptr;
 
@@ -76,17 +76,18 @@ int main(){
             __m256 a = _mm256_set1_ps(mat1[i*M+j]);
             for(int k = 0; k < (K/8)*8; k+=8){
                 // mask = K-k < 8 ? large_masks[8-(K-k)]:large_masks[0];
-                _mm256_store_ps(mat3+i*K+k, _mm256_fmadd_ps(a, _mm256_load_ps(mat2+j*K+k),_mm256_load_ps(mat3+i*K+k)));
+                _mm256_store_ps(&mat3[i*K+k], _mm256_fmadd_ps(a, _mm256_load_ps(&mat2[j*K+k]),_mm256_load_ps(&mat3[i*K+k])));
                 // mat3[i*K+k] += mat1[i*M+j]*mat2[j*K+k];
             }
         }
     }
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < M; j++){
-            __m256 a = _mm256_set1_ps(mat1[i*M+j]);
-            for(int k = (K/8)*8; k < K; k++){
+    if(K%8 !=0){
+        for(int i = 0; i < N; i++){
+            for(int j = 0; j < M; j++){
+                __m256 a = _mm256_set1_ps(mat1[i*M+j]);
+                int k = (K/8)*8;
                 mask = large_masks[8-(K-k)];
-                _mm256_maskstore_ps(mat3+i*K+k, mask, _mm256_fmadd_ps(a, _mm256_maskload_ps(mat2+j*K+k, mask),_mm256_maskload_ps(mat3+i*K+k, mask)));
+                _mm256_maskstore_ps(&mat3[i*K+k], mask, _mm256_fmadd_ps(a, _mm256_maskload_ps(&mat2[j*K+k], mask),_mm256_maskload_ps(&mat3[i*K+k], mask)));
             }
         }
     }
