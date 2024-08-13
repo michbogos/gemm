@@ -3,6 +3,9 @@
 #include<math.h>
 #include<time.h>
 #include<immintrin.h>
+#include<omp.h>
+
+#define NTHREADS 8
 
 float randf(){
     return (float)rand()/(float)RAND_MAX;
@@ -71,6 +74,7 @@ int main(){
 
     clock_t tic, toc;
     tic = clock();
+    #pragma omp parallel for num_threads(NTHREADS) schedule(static)
     for(int i = 0; i < N; i++){
         for(int j = 0; j < M; j++){
             __m256 a = _mm256_set1_ps(mat1[i*M+j]);
@@ -100,8 +104,8 @@ int main(){
             }
         }
     }
-    printf("Reference      GFLOPS/S     : %f\n", N*K*M/(((float)tocref-(float)ticref)/(float)CLOCKS_PER_SEC)/1000000000);
-    printf("Implementation GFLOPS/S     : %f\n", N*K*M/(((float)toc-(float)tic)/(float)CLOCKS_PER_SEC)/1000000000);
+    printf("Reference      GFLOPS/S     : %f\n", 2*N*K*M/(((double)tocref-(double)ticref)/(double)CLOCKS_PER_SEC)/1000000000.0);
+    printf("Implementation GFLOPS/S     : %f\n", (2*N*K*M/(((double)toc-(double)tic)/((double)CLOCKS_PER_SEC))/1000000000.0)*NTHREADS);
     // fclose(fileptr);
     return 0;
 }
