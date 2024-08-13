@@ -11,9 +11,9 @@ float randf(){
 int main(){
     int N, M, K;
 
-    N = 1024;
-    M = 1024;
-    K = 1024;
+    N = 1023;
+    M = 1023;
+    K = 1023;
 
     // FILE* fileptr;
 
@@ -24,10 +24,10 @@ int main(){
     // int res = fscanf(fileptr, "%d %d %d", &N, &M, &K);
     // if(res != 3) return 0;
     printf("%d %d %d\n", N, M, K);
-    float* mat1 =   _mm_malloc(N*M*sizeof(float), 32);
-    float* mat2 =   _mm_malloc(M*K*sizeof(float), 32);
-    float* mat3 =   _mm_malloc(N*K*sizeof(float), 32);
-    float* matref = _mm_malloc(N*K*sizeof(float), 32);
+    float* mat1 =   _mm_malloc(N*M*sizeof(float), 64);
+    float* mat2 =   _mm_malloc(M*K*sizeof(float), 64);
+    float* mat3 =   _mm_malloc(N*K*sizeof(float), 64);
+    float* matref = _mm_malloc(N*K*sizeof(float), 64);
 
     for(int i = 0; i < N*M; i++){
         // fscanf(fileptr, "%f", &mat1[i]);
@@ -76,12 +76,12 @@ int main(){
             __m256 a = _mm256_set1_ps(mat1[i*M+j]);
             for(int k = 0; k < (K/8)*8; k+=8){
                 // mask = K-k < 8 ? large_masks[8-(K-k)]:large_masks[0];
-                _mm256_store_ps(&mat3[i*K+k], _mm256_fmadd_ps(a, _mm256_load_ps(&mat2[j*K+k]),_mm256_load_ps(&mat3[i*K+k])));
+                _mm256_storeu_ps(&mat3[i*K+k], _mm256_fmadd_ps(a, _mm256_loadu_ps(&mat2[j*K+k]),_mm256_loadu_ps(&mat3[i*K+k])));
                 // mat3[i*K+k] += mat1[i*M+j]*mat2[j*K+k];
             }
         }
     }
-    if(K%8 !=0){
+    if(K%8!=0){
         for(int i = 0; i < N; i++){
             for(int j = 0; j < M; j++){
                 __m256 a = _mm256_set1_ps(mat1[i*M+j]);
